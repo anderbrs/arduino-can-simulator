@@ -90,16 +90,14 @@ void loop() {
 
     // O QUINTO PARAMETRO É O DIVISOR ANTES DO ENVIO!
 
-    // addPGN(65253, 247,   4, 1, 0.05,   0,  500,  (char*) "65253-HOURMETER",       0.1,  1 );   
-    // addPGN(65262, 110,   1, 1, 1,     -40, tm,  (char*) "65262-LIQUID TEMP",     15,   1 );    //pot
-    // addPGN(61444, 190,   2, 4, 0.125,  0,  rpm,  (char*) "61444-ENGINE RPM",      50,   1 );   //pot
-    // addPGN(65263, 100,   1, 4, 4,      0,  po,  (char*) "65263-OIL PRESSURE",    50,   1 );    //pot 
-    // addPGN(65276, 96,    1, 2, 0.4,    0,  050,  (char*) "65276-FUEL LEVEL",      05,   1 );
-    // addPGN(65265, 84,    2, 2, 0.0039,  0,  km,    (char*) "65265-VEHICLE SPEED",   05,   1 ); //pot        
-    // addPGN(65257, 250,   4, 5, 0.5,    0,  005,  (char*) "65257-TOTAL FUEL",      05,   1 );      
-    //addPGN(65132, 1624,  2, 7, 1,      0,  80,   (char*) "65132-Tachograph",      05,   1 ); 
-    //adiciona pgn High Resolution Vehicle Distance: VDHR
-    addPGN(65217, 917,   4, 1, 5,   0,  telemetryData.hodometer,  (char*) "65217-HODOMETER",  0.1,  1 );
+    addPGN(65253, 247,   4, 1, 180,     0,  telemetryData.hourmeter,  (char*) "65253-HOURMETER",0.1,  1 );   
+    addPGN(65262, 110,   1, 1, 1,       0,  tm,  (char*) "65262-LIQUID TEMP", 15, 1 );    
+    addPGN(61444, 190,   2, 4, 0.125,   0,  rpm,  (char*) "61444-ENGINE RPM", 50, 1 );   
+    addPGN(65263, 100,   1, 4, 4,       0,  po,  (char*) "65263-OIL PRESSURE", 50, 1 ); 
+    addPGN(65276, 96,    1, 2, 40,      0,  telemetryData.fuelLevel,  (char*) "65276-FUEL LEVEL",05, 1 );
+    addPGN(65265, 84,    2, 2, 0.0039,  0,  km,    (char*) "65265-VEHICLE SPEED", 05, 1 );
+    addPGN(65257, 250,   4, 1, 500,     0,  telemetryData.litrometer,  (char*) "65257-TOTAL FUEL",05, 1 );      
+    addPGN(65217, 917,   4, 1, 5,       0,  telemetryData.hodometer,  (char*) "65217-HODOMETER", 0.1, 1 );
     
     sendPGNs();
     count++;      
