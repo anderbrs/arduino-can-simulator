@@ -16,16 +16,13 @@ int tm;
 struct can_frame canMsg;
 MCP2515 mcp2515(10);
 
-
 struct EepromData{
-  short header;
-  long hodometer;
-  long hourmeter;
-  long litrometer;
-  long fuelLevel;
+  short header;      //o valor 10 indica que ha dados validos na eeprom
+  long hodometer;    //hodometro em metros
+  long hourmeter;    //horimetro em segundos
+  long litrometer;   //consumo de combustível em mililitros
+  long fuelLevel;    //nivel de combustivel em % * 100 (ex: 50% = 5000)   
 };
-
-
 
 EepromData telemetryData;
 
@@ -51,6 +48,7 @@ int x = 0;
 int count = 0;
 
 void setup() {
+
     Serial.begin(9600);
     Serial.println(F("CAN SIMULATOR STARTING..."));
 
@@ -60,12 +58,16 @@ void setup() {
     
     EEPROM.get(0, telemetryData);
 
-    if(!checkFirstAddressValue(telemetryData.header)){    
-      Serial.print("Clear EEPROM!");
+    if(telemetryData.header == 10){   
+
+      Serial.println("#############");   
+      Serial.println("Clear EEPROM!");
+      Serial.println("#############");   
+
       telemetryData.hodometer = 0;      
       telemetryData.hourmeter = 0;
       telemetryData.litrometer = 0;
-      telemetryData.fuelLevel = 100;
+      telemetryData.fuelLevel = 10000;
     }
 
 }
@@ -86,36 +88,82 @@ void loop() {
     // Zera os PGNs antes de adicionar novos dados
     xPgns = 0;
 
-    addPGN(65253, 247,   4, 1, 0.05,   0,  500,  (char*) "65253-HOURMETER",       0.1,  1 );   
-    addPGN(65262, 110,   1, 1, 1,     -40, tm,  (char*) "65262-LIQUID TEMP",     15,   1 );    //pot
-    addPGN(61444, 190,   2, 4, 0.125,  0,  rpm,  (char*) "61444-ENGINE RPM",      50,   1 );   //pot
-    addPGN(65263, 100,   1, 4, 4,      0,  po,  (char*) "65263-OIL PRESSURE",    50,   1 );    //pot 
-    addPGN(65276, 96,    1, 2, 0.4,    0,  050,  (char*) "65276-FUEL LEVEL",      05,   1 );
-    addPGN(65265, 84,    2, 2, 0.0039,  0,  km,    (char*) "65265-VEHICLE SPEED",   05,   1 ); //pot        
-    addPGN(65257, 250,   4, 5, 0.5,    0,  005,  (char*) "65257-TOTAL FUEL",      05,   1 );      
-    addPGN(65132, 1624,  2, 7, 1,      0,  80,   (char*) "65132-Tachograph",      05,   1 ); 
+    // O QUINTO PARAMETRO É O DIVISOR ANTES DO ENVIO!
 
+    // addPGN(65253, 247,   4, 1, 0.05,   0,  500,  (char*) "65253-HOURMETER",       0.1,  1 );   
+    // addPGN(65262, 110,   1, 1, 1,     -40, tm,  (char*) "65262-LIQUID TEMP",     15,   1 );    //pot
+    // addPGN(61444, 190,   2, 4, 0.125,  0,  rpm,  (char*) "61444-ENGINE RPM",      50,   1 );   //pot
+    // addPGN(65263, 100,   1, 4, 4,      0,  po,  (char*) "65263-OIL PRESSURE",    50,   1 );    //pot 
+    // addPGN(65276, 96,    1, 2, 0.4,    0,  050,  (char*) "65276-FUEL LEVEL",      05,   1 );
+    // addPGN(65265, 84,    2, 2, 0.0039,  0,  km,    (char*) "65265-VEHICLE SPEED",   05,   1 ); //pot        
+    // addPGN(65257, 250,   4, 5, 0.5,    0,  005,  (char*) "65257-TOTAL FUEL",      05,   1 );      
+    //addPGN(65132, 1624,  2, 7, 1,      0,  80,   (char*) "65132-Tachograph",      05,   1 ); 
+    //adiciona pgn High Resolution Vehicle Distance: VDHR
+    addPGN(65217, 917,   4, 1, 5,   0,  telemetryData.hodometer,  (char*) "65217-HODOMETER",  0.1,  1 );
     
     sendPGNs();
+    count++;      
 
-    delay(100);   
-
-    count++;
-    telemetryData.hodometer++;
-
-    if(count % 50 == 0){          
-      telemetryData.hodometer += km;
-      Serial.print("hod = ");
-      Serial.println(telemetryData.hodometer);
+    if(count % 10 == 0){       
+        updateTelemetryData();       
     }
 
-    if(count % 250 == 0){    
-      telemetryData.header = 10;     
-      Serial.print("Gravei na EPROM: hod->");
-      Serial.println(telemetryData.hodometer);
-      EEPROM.put(0, telemetryData);
+    if(count % 300 == 0){    
+      telemetryData.header = 10; 
+      Serial.println("GRAVANDO EEPROM");     
+      //EEPROM.put(0, telemetryData);
     }
+
+    delay(100);
     
+}
+
+void updateTelemetryData(){
+
+    //converte velocidade (km) para m/s e acumula no hodometro
+    telemetryData.hodometer += (km * 10) / 36;
+
+    //se rpm > 400 acumula 1 segundo no hourmeter
+    if(rpm > 400){
+        telemetryData.hourmeter += 1;
+    }
+
+    //acumala rpm/100 em mililitros no litrometer
+    telemetryData.litrometer += rpm / 100;
+
+    //desconta rpm/100 no fuelLevel
+    telemetryData.fuelLevel -= rpm / 100;
+
+    // se fuelLevel < 0, reiniia em 10000
+    if(telemetryData.fuelLevel < 0){
+        telemetryData.fuelLevel = 10000;
+    }
+
+    printValues();   
+ 
+}
+
+void printValues(){
+      //printa os valores dos potenciometros
+      Serial.print(" km=");  
+      Serial.print(km);
+      Serial.print(" rpm=");
+      Serial.print(rpm);
+      Serial.print(" po=");
+      Serial.print(po);
+      Serial.print(" tm=");
+      Serial.print(tm);      
+      
+      Serial.print(" hod=");
+      Serial.print(telemetryData.hodometer);
+      Serial.print(" hour=");
+      Serial.print(telemetryData.hourmeter);
+      Serial.print(" litro=");
+      Serial.print(telemetryData.litrometer);
+      Serial.print(" fuel=");
+      Serial.print(telemetryData.fuelLevel);
+
+      Serial.println();
 }
 
 void sendPGNs() {
@@ -195,10 +243,4 @@ unsigned long getCanId(int _pgn) {
   */  
 
     return canId;
-}
-
-
-
-bool checkFirstAddressValue(short data) {
-  return (data == 10);
 }
