@@ -58,7 +58,7 @@ void setup() {
     
     EEPROM.get(0, telemetryData);
 
-    if(telemetryData.header == 10){   
+    if(telemetryData.header != 10){   
 
       Serial.println("#############");   
       Serial.println("Clear EEPROM!");
@@ -136,7 +136,7 @@ void updateTelemetryData(){
         telemetryData.fuelLevel = 10000;
     }
 
-    //printValues();   
+    printValues();   
  
 }
 
