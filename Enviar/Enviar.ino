@@ -136,7 +136,7 @@ void updateTelemetryData(){
         telemetryData.fuelLevel = 10000;
     }
 
-    printValues();   
+    //printValues();   
  
 }
 
