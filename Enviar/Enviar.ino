@@ -100,7 +100,7 @@ void loop() {
     addPGN(65217, 917,   4, 1, 5,       0,  telemetryData.hodometer,  (char*) "65217-HODOMETER", 0.1, 1 );
     
     sendPGNs();
-    count++;      
+    count++;
 
     if(count % 10 == 0){       
         updateTelemetryData();       
@@ -109,11 +109,10 @@ void loop() {
     if(count % 300 == 0){    
       telemetryData.header = 10; 
       Serial.println("GRAVANDO EEPROM");     
-      //EEPROM.put(0, telemetryData);
+      EEPROM.put(0, telemetryData);
     }
 
-    delay(100);
-    
+    delay(100);    
 }
 
 void updateTelemetryData(){
