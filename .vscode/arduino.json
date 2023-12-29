@@ -1,6 +1,6 @@
 {
     "configuration": "cpu=atmega328old",
     "board": "arduino:avr:nano",
-    "port": "COM5",
+    "port": "COM3",
     "sketch": "Enviar\\Enviar.ino"
 }

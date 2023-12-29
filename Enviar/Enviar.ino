@@ -70,7 +70,7 @@ void setup() {
       telemetryData.fuelLevel = 10000;
     }
 
-}
+    }
 
 void loop() {
     valorkm = analogRead(A2);
@@ -80,7 +80,7 @@ void loop() {
     rpm = valorrpm * (3000.0 / 1023); //rpm
 
     valortm = analogRead(A1);
-    tm = valortm * (150.0 / 1023.0); //temperatura motor
+    tm = valortm * (250.0 / 1023.0); //temperatura motor
 
     valorpo = analogRead(A4);
     po = valorpo * (200.0 / 1023.0); //pressão do oleo
@@ -96,7 +96,7 @@ void loop() {
     addPGN(65263, 100,   1, 4, 4,       0,  po,  (char*) "65263-OIL PRESSURE", 50, 1 ); 
     addPGN(65276, 96,    1, 2, 40,      0,  telemetryData.fuelLevel,  (char*) "65276-FUEL LEVEL",05, 1 );
     addPGN(65265, 84,    2, 2, 0.0039,  0,  km,    (char*) "65265-VEHICLE SPEED", 05, 1 );
-    addPGN(65257, 250,   4, 1, 500,     0,  telemetryData.litrometer,  (char*) "65257-TOTAL FUEL",05, 1 );      
+    addPGN(65257, 250,   4, 5, 500,     0,  telemetryData.litrometer,  (char*) "65257-TOTAL FUEL",05, 1 );      
     addPGN(65217, 917,   4, 1, 5,       0,  telemetryData.hodometer,  (char*) "65217-HODOMETER", 0.1, 1 );
     
     sendPGNs();
