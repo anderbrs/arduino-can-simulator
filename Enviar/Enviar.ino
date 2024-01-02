@@ -70,7 +70,7 @@ void setup() {
       telemetryData.fuelLevel = 10000;
     }
 
-    }
+}
 
 void loop() {
     valorkm = analogRead(A2);
@@ -125,7 +125,7 @@ void updateTelemetryData(){
         telemetryData.hourmeter += 1;
     }
 
-    //acumala rpm/100 em mililitros no litrometer
+    //acumula rpm/100 em mililitros no litrometer
     telemetryData.litrometer += rpm / 100;
 
     //desconta rpm/100 no fuelLevel
@@ -135,6 +135,19 @@ void updateTelemetryData(){
     if(telemetryData.fuelLevel < 0){
         telemetryData.fuelLevel = 10000;
     }
+    //se hodometro > 500000000, reinicia em 0
+    if(telemetryData.hodometer > 500000000L){
+        telemetryData.hodometer = 0;
+    }
+    //se litrometer > 100000000, reinicia em 0
+    if(telemetryData.litrometer > 100000000L){
+        telemetryData.litrometer = 0;
+    }
+    //se hourmeter > 100000 horas em segundos, reinicia em 0
+    if(telemetryData.hourmeter > 360000000L){
+        telemetryData.hourmeter = 0;
+    }
+
 
     printValues();   
  
